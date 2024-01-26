@@ -2,19 +2,9 @@ package db
 
 import (
 	"context"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"log"
 )
-
-type User struct {
-	ID        string      `json:"id"`
-	Username  string      `json:"username"`
-	Password  string      `json:"password"`
-	Email     string      `json:"email"`
-	CreatedAt pgtype.Date `json:"createdAt"`
-	UpdatedAt pgtype.Date `json:"updatedAt"`
-}
 
 func CreateTables(pool *pgxpool.Pool) {
 	log.Println("Creating tables...")

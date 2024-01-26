@@ -2,36 +2,22 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"golang-restful/internal/db"
+	"golang-restful/internal/routes"
 	"log"
-	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 )
 
-type App struct {
-	dbPool *pgxpool.Pool
-}
-
 func main() {
-	app := App{
-		dbPool: db.GetPostgresConnectionPool(),
-	}
-	db.CreateTables(app.dbPool)
-
-	// Schedule the pool to close when main() returns
-	defer app.dbPool.Close()
-
 	router := gin.Default()
+	postgresPool := db.GetPostgresConnectionPool()
 
-	router.GET("/users", app.getUsersHandler)
-	//router.GET("/user/:id", getUserById)
-	//router.POST("/user", createUser)
+	// Register user routes
+	routes.RegisterUserRoutes(router, postgresPool)
 
 	// Run with goroutine so it doesn't block
 	go func() {
@@ -54,17 +40,4 @@ func main() {
 	defer cancel()
 
 	log.Println("Server gracefully stopped")
-}
-
-func (app *App) getUsersHandler(c *gin.Context) {
-	var results string
-	err := app.dbPool.QueryRow(context.Background(), "select 'Hello, world!'").Scan(&results)
-
-	if err != nil {
-		fmt.Printf("Error: %s\n", err)
-		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "No users found."})
-		return
-	}
-
-	c.IndentedJSON(http.StatusOK, results)
 }
