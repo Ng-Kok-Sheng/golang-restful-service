@@ -18,17 +18,11 @@ type App struct {
 	dbPool *pgxpool.Pool
 }
 
-type user struct {
-	ID       string `json:"id"`
-	Username string `json:"username"`
-	Password string `json:"password"`
-	Email    string `json:"email"`
-}
-
 func main() {
 	app := App{
 		dbPool: db.GetPostgresConnectionPool(),
 	}
+	db.CreateTables(app.dbPool)
 
 	// Schedule the pool to close when main() returns
 	defer app.dbPool.Close()
