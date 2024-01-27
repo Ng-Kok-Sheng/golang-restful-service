@@ -18,17 +18,36 @@ func RegisterUserRoutes(router *gin.Engine, dbPool *pgxpool.Pool) {
 	}
 
 	router.GET("/users", userHandler.getAllUsers)
-	router.GET("/user/:id", userHandler.getUserById)
+	router.GET("/user", userHandler.getUserByUsernameAndPassword)
 	router.POST("/user", userHandler.createUser)
 	router.PUT("/user/:id", userHandler.updateUser)
 	router.DELETE("/user/:id", userHandler.deleteUser)
 }
 
 func (app *UserHandlers) getAllUsers(c *gin.Context) {
+	allUsers, err := users.GetAllUsers(app.DbPool)
+	if err != nil {
+		log.Printf("Something went wrong parsing user body: %s\n", err)
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong fetching users"})
+		return
+	}
 
+	c.IndentedJSON(http.StatusOK, gin.H{"data": allUsers})
+	return
 }
 
-func (app *UserHandlers) getUserById(c *gin.Context) {}
+func (app *UserHandlers) getUserByUsernameAndPassword(c *gin.Context) {
+	username := c.Query("username")
+	password := c.Query("password")
+	user, err := users.GetUserByUsernameAndPassword(app.DbPool, username, password)
+	if err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "User not found."})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, gin.H{"data": user})
+	return
+}
 
 func (app *UserHandlers) createUser(c *gin.Context) {
 	var user users.User
@@ -45,7 +64,7 @@ func (app *UserHandlers) createUser(c *gin.Context) {
 		return
 	}
 
-	c.IndentedJSON(http.StatusCreated, gin.H{"message": "User successfully created", "id": user.ID})
+	c.IndentedJSON(http.StatusCreated, gin.H{"data": user.ID})
 }
 
 func (app *UserHandlers) updateUser(c *gin.Context) {}

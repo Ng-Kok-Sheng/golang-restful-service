@@ -55,3 +55,33 @@ func InsertUser(dbPool *pgxpool.Pool, user *User) error {
 
 	return dbPool.QueryRow(context.Background(), query, user.Username, user.Password, user.Email).Scan(&user.ID)
 }
+
+func GetAllUsers(dbPool *pgxpool.Pool) (users []User, err error) {
+	query := `SELECT * FROM users`
+
+	rows, err := dbPool.Query(context.Background(), query)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var user User
+		if err := rows.Scan(&user.ID, &user.Username, &user.Password, &user.Email, &user.CreatedAt, &user.UpdatedAt); err != nil {
+			return nil, err
+		}
+
+		users = append(users, user)
+	}
+
+	return users, nil
+}
+
+func GetUserByUsernameAndPassword(dbPool *pgxpool.Pool, username string, password string) (user User, err error) {
+	query := `SELECT * FROM users WHERE username = $1 AND password = $2`
+
+	err = dbPool.QueryRow(context.Background(), query, username, password).Scan(
+		&user.ID, &user.Username, &user.Password, &user.Email, &user.CreatedAt, &user.UpdatedAt,
+	)
+
+	return
+}
