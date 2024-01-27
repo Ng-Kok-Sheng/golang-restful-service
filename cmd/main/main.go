@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"github.com/gin-gonic/gin"
-	"golang-restful/internal/db"
+	"golang-restful/internal/database"
 	"golang-restful/internal/routes"
 	"log"
 	"os"
@@ -14,7 +14,7 @@ import (
 
 func main() {
 	router := gin.Default()
-	postgresPool := db.GetPostgresConnectionPool()
+	postgresPool := database.GetPostgresConnectionPool()
 	defer postgresPool.Close()
 
 	// Register user routes
