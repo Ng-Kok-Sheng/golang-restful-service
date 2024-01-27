@@ -71,6 +71,22 @@ func (app *UserHandlers) createUser(c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, gin.H{"data": user.ID})
 }
 
-func (app *UserHandlers) updateUser(c *gin.Context) {}
+func (app *UserHandlers) updateUser(c *gin.Context) {
+	userId := c.Param("id")
+	var updateRequest users.UserUpdateRequest
+	if err := c.BindJSON(&updateRequest); err != nil {
+		log.Printf("Something went wrong parsing user update request: %s\n", err)
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Something went parsing user update request."})
+		return
+	}
+
+	if err := users.UpdateUser(app.DbPool, userId, updateRequest); err != nil {
+		log.Printf("Something went wrong updating the user: %s\n", err)
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong updating the user."})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, gin.H{"message": "Update successful"})
+}
 
 func (app *UserHandlers) deleteUser(c *gin.Context) {}

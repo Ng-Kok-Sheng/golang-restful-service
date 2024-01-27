@@ -4,6 +4,8 @@ import (
 	"context"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"log"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -14,6 +16,11 @@ type User struct {
 	Email     string    `json:"email"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+type UserUpdateRequest struct {
+	Password *string `json:"password"`
+	Email    *string `json:"email"`
 }
 
 func CreateTable(pool *pgxpool.Pool) {
@@ -83,5 +90,34 @@ func GetUserByUsernameAndPassword(dbPool *pgxpool.Pool, username string, passwor
 		&user.ID, &user.Username, &user.Password, &user.Email, &user.CreatedAt, &user.UpdatedAt,
 	)
 
+	return
+}
+
+func UpdateUser(dbPool *pgxpool.Pool, id string, updateRequest UserUpdateRequest) (err error) {
+	query := `UPDATE users SET `
+	var args []interface{}
+	argId := 1
+
+	if updateRequest.Password != nil {
+		query += "password = $" + strconv.Itoa(argId) + ", "
+		args = append(args, updateRequest.Password)
+		argId++
+	}
+
+	if updateRequest.Email != nil {
+		query += "email = $" + strconv.Itoa(argId) + ", "
+		args = append(args, updateRequest.Email)
+		argId++
+	}
+
+	query = strings.TrimSuffix(query, ", ")
+	query += " WHERE id = $" + strconv.Itoa(argId)
+	args = append(args, id)
+
+	_, err = dbPool.Exec(context.Background(), query, args...)
+	return
+}
+
+func DeleteUser(dbPool *pgxpool.Pool) (user User, err error) {
 	return
 }
