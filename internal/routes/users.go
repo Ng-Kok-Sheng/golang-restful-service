@@ -27,8 +27,12 @@ func RegisterUserRoutes(router *gin.Engine, dbPool *pgxpool.Pool) {
 func (app *UserHandlers) getAllUsers(c *gin.Context) {
 	allUsers, err := users.GetAllUsers(app.DbPool)
 	if err != nil {
-		log.Printf("Something went wrong parsing user body: %s\n", err)
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong fetching users"})
+		return
+	}
+
+	if len(allUsers) == 0 {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "No users found."})
 		return
 	}
 
