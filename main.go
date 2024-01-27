@@ -15,6 +15,7 @@ import (
 func main() {
 	router := gin.Default()
 	postgresPool := db.GetPostgresConnectionPool()
+	defer postgresPool.Close()
 
 	// Register user routes
 	routes.RegisterUserRoutes(router, postgresPool)

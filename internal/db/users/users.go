@@ -1,12 +1,22 @@
-package db
+package users
 
 import (
 	"context"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"log"
+	"time"
 )
 
-func CreateTables(pool *pgxpool.Pool) {
+type User struct {
+	ID        string    `json:"id"`
+	Username  string    `json:"username"`
+	Password  string    `json:"password"`
+	Email     string    `json:"email"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+func CreateTable(pool *pgxpool.Pool) {
 	log.Println("Creating tables...")
 	ctx := context.Background()
 
@@ -32,8 +42,16 @@ func CreateTables(pool *pgxpool.Pool) {
 
 	_, err = pool.Exec(ctx, createSQLTable)
 	if err != nil {
-		log.Fatal("Something went wrong initializing tables: ", err)
+		log.Fatal("Something went wrong initializing table user: ", err)
 	}
 
-	log.Println("Tables created successfully")
+	log.Println("Table user created successfully")
+}
+
+func InsertUser(dbPool *pgxpool.Pool, user *User) error {
+	query := `
+	INSERT into users (username, password, email) VALUES ($1, $2, $3) RETURNING id
+	`
+
+	return dbPool.QueryRow(context.Background(), query, user.Username, user.Password, user.Email).Scan(&user.ID)
 }

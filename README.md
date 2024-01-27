@@ -1,5 +1,4 @@
 # GoLang Restful Server (To come up with a better name)
-***
 Personal side project to explore writing a restful server with other programming languages and tools. Project is a
 simple user API with authentication and common CRUD operations.
 
@@ -10,18 +9,15 @@ simple user API with authentication and common CRUD operations.
 - Redis as cache
 
 ## Packages Used
-***
 - gin
 - pgx
 
 ## Prerequisites
-***
 - Using GoLang 1.19
 - Ensure docker daemon is running
 - Ensure docker compose is available
 
 ## Environment Variables
-***
 Ensure that these environment variables are exported.
 - SERVER_PORT
 ```bash
@@ -33,7 +29,6 @@ export POSTGRES_URI=postgres://<username>:<password>@localhost:5432/test_db
 ```
 
 ## Instructions to start
-***
 1. Open terminal and run 
 ```bash
 docker compose up -d
@@ -44,4 +39,11 @@ docker compose up -d
 go run main.go
 ```
 
-pgAdmin4 can be access through [localhost:5050](localhost:5050).
+pgAdmin4 can be access through [localhost:5050](localhost:5050). Default login for local pg4 is **admin** and **root**.
+
+## Testing
+### Unit Testing
+To test library packages.
+
+### Integration Testing
+To create test cases for CRUD cases.

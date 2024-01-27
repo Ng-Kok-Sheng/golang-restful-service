@@ -1,25 +1,15 @@
 package routes
 
 import (
-	"context"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"golang-restful/internal/db/users"
+	"log"
 	"net/http"
-	"time"
 )
 
 type UserHandlers struct {
 	DbPool *pgxpool.Pool
-}
-
-type User struct {
-	ID        string    `json:"id"`
-	Username  string    `json:"username"`
-	Password  string    `json:"password"`
-	Email     string    `json:"email"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
 }
 
 func RegisterUserRoutes(router *gin.Engine, dbPool *pgxpool.Pool) {
@@ -35,21 +25,28 @@ func RegisterUserRoutes(router *gin.Engine, dbPool *pgxpool.Pool) {
 }
 
 func (app *UserHandlers) getAllUsers(c *gin.Context) {
-	var results string
-	err := app.DbPool.QueryRow(context.Background(), "select * from users'").Scan(&results)
 
-	if err != nil {
-		fmt.Printf("Error: %s\n", err)
-		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "No users found."})
-		return
-	}
-
-	c.IndentedJSON(http.StatusOK, results)
 }
 
 func (app *UserHandlers) getUserById(c *gin.Context) {}
 
-func (app *UserHandlers) createUser(c *gin.Context) {}
+func (app *UserHandlers) createUser(c *gin.Context) {
+	var user users.User
+	if err := c.BindJSON(&user); err != nil {
+		log.Printf("Something went wrong parsing user body: %s\n", err)
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong parsing user body."})
+		return
+	}
+
+	// TODO: To implement password hashing before inserting to DB
+	if err := users.InsertUser(app.DbPool, &user); err != nil {
+		log.Printf("Something went wrong inserting the user: %s\n", err)
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong inserting user."})
+		return
+	}
+
+	c.IndentedJSON(http.StatusCreated, gin.H{"message": "User successfully created", "id": user.ID})
+}
 
 func (app *UserHandlers) updateUser(c *gin.Context) {}
 
